@@ -9,7 +9,6 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
-import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.psi.util.PsiTreeUtil;
 
 import java.io.File;
@@ -118,17 +117,11 @@ public class CustomAssertAction extends AnAction {
 
                 VirtualFile baseDir = getProject().getBaseDir();
                 VirtualFile srcTestJava = baseDir.findFileByRelativePath("src/test/java");
-                PsiManager psiManager = PsiManager.getInstance(getProject());
-                PsiDirectory directory = psiManager.findDirectory(srcTestJava);
-                String substring = psiClass.getQualifiedName().substring(0, psiClass.getQualifiedName().length() - psiClass.getName().length());
-                String[] split = substring.split("\\.");
-                StringBuilder path = new StringBuilder(srcTestJava.getPath());
-                for (String s : split) {
-                    path.append(File.separator).append(s);
-                }
-                VirtualFile directories = VfsUtil.createDirectories(path.toString());
-                PsiDirectory directory1 = PsiDirectoryFactory.getInstance(getProject()).createDirectory(directories);
-                directory1.add(assertClass);
+                String packageName = ((PsiJavaFile) psiClass.getContainingFile()).getPackageName();
+                String packageRelativePath = packageName.replaceAll("\\.", File.separator);
+                VirtualFile directories = VfsUtil.createDirectories(srcTestJava.getPath() + File.separator + packageRelativePath);
+                PsiDirectory targetDir = PsiManager.getInstance(getProject()).findDirectory(directories);
+                targetDir.add(assertClass);
             }
         }.execute();
     }
