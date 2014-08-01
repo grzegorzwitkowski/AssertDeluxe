@@ -11,6 +11,7 @@ import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 
 import java.io.File;
@@ -25,91 +26,30 @@ public class AssertClassBuilder {
     private String assertClassName;
     private PsiElementFactory elementFactory;
     private String sourceClassFieldName;
-    private AssertClassCodeGenerator assertClassCodeGenerator;
+    private AssertClassCodeGenerator codeGenerator;
 
     public AssertClassBuilder(Project project, PsiClass sourceClass, List<PsiField> chosenFields,
-                              AssertClassCodeGenerator assertClassCodeGenerator) {
+                              AssertClassCodeGenerator codeGenerator) {
         this.project = project;
         this.sourceClass = sourceClass;
         this.chosenFields = chosenFields;
         this.assertClassName = createAssertClassName(sourceClass);
         this.sourceClassFieldName = createSourceClassFieldName();
         this.elementFactory = JavaPsiFacade.getElementFactory(this.project);
-        this.assertClassCodeGenerator = assertClassCodeGenerator;
+        this.codeGenerator = codeGenerator;
     }
 
     public void invoke() throws IOException {
-
         PsiClass assertClass = elementFactory.createClass(assertClassName);
-
-        PsiField actualField = createSourceClassField(assertClass);
-        assertClass.add(actualField);
-
-        StringBuilder constructorText = new StringBuilder()
-                .append("private ")
-                .append(assertClassName)
-                .append("(")
-                .append(sourceClass.getName())
-                .append(" ")
-                .append(sourceClassFieldName)
-                .append(") {\n")
-                .append("this.")
-                .append(sourceClassFieldName)
-                .append(" = ")
-                .append(sourceClassFieldName)
-                .append(";\n")
-                .append("}");
-        PsiMethod constructor = elementFactory.createMethodFromText(constructorText.toString(), assertClass);
-        assertClass.add(constructor);
-
-        StringBuilder mainAssertionText = new StringBuilder()
-                .append("public static ")
-                .append(assertClassName)
-                .append(" assert")
-                .append(sourceClass.getName())
-                .append("(")
-                .append(sourceClass.getName())
-                .append(" ")
-                .append(sourceClassFieldName)
-                .append(") {\n")
-                .append("return new ")
-                .append(assertClassName)
-                .append("(")
-                .append(sourceClassFieldName)
-                .append(");")
-                .append("}");
-        PsiMethod mainAssertion = elementFactory.createMethodFromText(mainAssertionText.toString(), assertClass);
-        assertClass.add(mainAssertion);
-
+        assertClass.add(createSourceClassField(assertClass));
+        assertClass.add(createConstructor(assertClass));
+        assertClass.add(createStaticAssertMethod(assertClass));
         for (PsiField field : chosenFields) {
-            String fieldCC = Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
-            String fieldType = field.getTypeElement().getText();
-            String parameterName = field.getName();
-            StringBuilder methodText = new StringBuilder()
-                    .append("public ")
-                    .append(assertClassName)
-                    .append(" ")
-                    .append("has")
-                    .append(fieldCC)
-                    .append("(")
-                    .append(fieldType)
-                    .append(" ")
-                    .append(parameterName)
-                    .append(") {\n")
-                    .append("org.assertj.core.api.Assertions.assertThat(")
-                    .append(sourceClassFieldName)
-                    .append(".get")
-                    .append(fieldCC)
-                    .append("()).isEqualTo(")
-                    .append(parameterName)
-                    .append(");\n")
-                    .append("return this;\n")
-                    .append("}");
-            PsiMethod assertMethod = elementFactory.createMethodFromText(methodText.toString(), assertClass);
-            assertClass.add(assertMethod);
+            assertClass.add(createFieldAssertMethod(assertClass, field));
         }
 
         JavaCodeStyleManager.getInstance(project).shortenClassReferences(assertClass);
+        CodeStyleManager.getInstance(project).reformat(assertClass);
 
         VirtualFile baseDir = project.getBaseDir();
         VirtualFile srcTestJava = baseDir.findFileByRelativePath("src/test/java");
@@ -120,9 +60,20 @@ public class AssertClassBuilder {
         targetDir.add(assertClass);
     }
 
+    private PsiMethod createFieldAssertMethod(PsiClass assertClass, PsiField field) {
+        return elementFactory.createMethodFromText(codeGenerator.fieldAssertMethod(field), assertClass);
+    }
+
+    private PsiMethod createStaticAssertMethod(PsiClass assertClass) {
+        return elementFactory.createMethodFromText(codeGenerator.staticAssertMethod(), assertClass);
+    }
+
     private PsiField createSourceClassField(PsiClass assertClass) {
-        String text = assertClassCodeGenerator.sourceClassField();
-        return elementFactory.createFieldFromText(text, assertClass);
+        return elementFactory.createFieldFromText(codeGenerator.sourceClassField(), assertClass);
+    }
+
+    private PsiMethod createConstructor(PsiClass assertClass) {
+        return elementFactory.createMethodFromText(codeGenerator.constructor(), assertClass);
     }
 
     private String createAssertClassName(PsiClass sourceClass) {
