@@ -25,7 +25,6 @@ public class AssertClassBuilder {
     private List<PsiField> chosenFields;
     private String assertClassName;
     private PsiElementFactory elementFactory;
-    private String sourceClassFieldName;
     private AssertClassCodeGenerator codeGenerator;
 
     public AssertClassBuilder(Project project, PsiClass sourceClass, List<PsiField> chosenFields,
@@ -34,7 +33,6 @@ public class AssertClassBuilder {
         this.sourceClass = sourceClass;
         this.chosenFields = chosenFields;
         this.assertClassName = createAssertClassName(sourceClass);
-        this.sourceClassFieldName = createSourceClassFieldName();
         this.elementFactory = JavaPsiFacade.getElementFactory(this.project);
         this.codeGenerator = codeGenerator;
     }
@@ -78,9 +76,5 @@ public class AssertClassBuilder {
 
     private String createAssertClassName(PsiClass sourceClass) {
         return sourceClass.getName() + "Assert";
-    }
-
-    private String createSourceClassFieldName() {
-        return Character.toLowerCase(sourceClass.getName().charAt(0)) + sourceClass.getName().substring(1);
     }
 }
