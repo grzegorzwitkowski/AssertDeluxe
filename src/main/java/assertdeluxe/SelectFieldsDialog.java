@@ -1,3 +1,5 @@
+package assertdeluxe;
+
 import com.intellij.ide.util.DefaultPsiElementCellRenderer;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.LabeledComponent;
@@ -13,14 +15,13 @@ import java.util.List;
 
 public class SelectFieldsDialog extends DialogWrapper {
 
-    private CollectionListModel<PsiField> fields;
     private final LabeledComponent<JPanel> labeledComponent;
+    private final JBList fieldList;
 
     public SelectFieldsDialog(PsiClass psiClass) {
         super(psiClass.getProject());
         setTitle("Select Fields for Assertions");
-        fields = new CollectionListModel<PsiField>(psiClass.getFields());
-        JBList fieldList = new JBList(fields);
+        fieldList = new JBList(new CollectionListModel<>(psiClass.getFields()));
         fieldList.setCellRenderer(new DefaultPsiElementCellRenderer());
         ToolbarDecorator decorator = ToolbarDecorator.createDecorator(fieldList);
         decorator.disableAddAction();
@@ -36,6 +37,6 @@ public class SelectFieldsDialog extends DialogWrapper {
     }
 
     public List<PsiField> getFields() {
-        return fields.getItems();
+        return fieldList.getSelectedValuesList();
     }
 }

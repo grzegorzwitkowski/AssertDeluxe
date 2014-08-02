@@ -38,7 +38,7 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action id="assert-deluxe-action" class="AssertDeluxeAction" text="Custom Assertion">
+        <action id="assert-deluxe-action" class="assertdeluxe.AssertDeluxeAction" text="Custom Assertion">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>
     </actions>
