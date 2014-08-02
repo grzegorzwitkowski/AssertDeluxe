@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 
@@ -13,13 +14,24 @@ import java.util.List;
 
 public class AssertDeluxeAction extends AnAction {
 
+    private final TestSourceRootProvider testSourceRootProvider;
+
+    public AssertDeluxeAction() {
+        testSourceRootProvider = new TestSourceRootProvider();
+    }
+
     public void actionPerformed(AnActionEvent e) {
         PsiClass sourceClass = getPsiClassFromEvent(e);
+        int numberOfTestSourcesRoots = testSourceRootProvider.getTestSourceRoots(sourceClass.getProject()).size();
+        if (numberOfTestSourcesRoots == 0) {
+            Messages.showErrorDialog("No Test Sources Root found.", "Custom Assertion");
+            return;
+        }
         List<PsiField> selectedFields = getFieldsSelectedByUser(sourceClass);
         if (selectedFields == null) {
             return;
         }
-        PsiDirectory testSourceRoot = getTestSourceRootSelectedByUser(sourceClass);
+        PsiDirectory testSourceRoot = choseTestSourcesRoot(sourceClass, numberOfTestSourcesRoots);
         if (testSourceRoot == null) {
             return;
         }
@@ -52,8 +64,18 @@ public class AssertDeluxeAction extends AnAction {
         return null;
     }
 
+    private PsiDirectory choseTestSourcesRoot(PsiClass sourceClass, int numberOfTestSourcesRoots) {
+        PsiDirectory testSourceRoot = null;
+        if (numberOfTestSourcesRoots == 1) {
+            testSourceRoot = testSourceRootProvider.getTestSourcesRoot(sourceClass.getProject());
+        } else if (numberOfTestSourcesRoots > 1) {
+            testSourceRoot = getTestSourceRootSelectedByUser(sourceClass);
+        }
+        return testSourceRoot;
+    }
+
     private PsiDirectory getTestSourceRootSelectedByUser(PsiClass sourceClass) {
-        SelectTestSourceRootDialog selectTestSourceRootDialog = new SelectTestSourceRootDialog(sourceClass);
+        SelectTestSourceRootDialog selectTestSourceRootDialog = new SelectTestSourceRootDialog(sourceClass.getProject(), testSourceRootProvider);
         selectTestSourceRootDialog.show();
         if (selectTestSourceRootDialog.isOK()) {
             return selectTestSourceRootDialog.getTestSourceRoot();
@@ -73,5 +95,4 @@ public class AssertDeluxeAction extends AnAction {
             }
         }.execute();
     }
-
 }
