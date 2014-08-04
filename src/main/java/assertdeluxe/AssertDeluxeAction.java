@@ -72,9 +72,7 @@ public class AssertDeluxeAction extends AnAction {
 
             @Override
             protected void run() throws Throwable {
-                AssertClassCodeGenerator assertClassCodeGenerator = new AssertClassCodeGenerator(sourceClass);
-                PsiAssertClassFactory psiAssertClassFactory = new PsiAssertClassFactory(assertClassCodeGenerator, psiFacade);
-                new WriteAssertClassCommand(sourceClass, chosenFields, testSourcesRoot, psiAssertClassFactory, psiFacade).invoke();
+                new WriteAssertClassCommand(sourceClass, chosenFields, testSourcesRoot, psiFacade).invoke();
             }
         }.execute();
     }
