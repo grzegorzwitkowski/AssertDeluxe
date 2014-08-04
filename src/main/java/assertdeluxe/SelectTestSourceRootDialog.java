@@ -18,10 +18,10 @@ public class SelectTestSourceRootDialog extends DialogWrapper {
     private LabeledComponent<JPanel> labeledComponent;
     private JBList testSourceRoots;
 
-    public SelectTestSourceRootDialog(Project project, TestSourceRootProvider testSourceRootProvider) {
+    public SelectTestSourceRootDialog(Project project, PsiFacade psiFacade) {
         super(project);
         setTitle("Select Test Source Root");
-        testSourceRoots = new JBList(new CollectionListModel<>(testSourceRootProvider.getTestSourceRoots(project)));
+        testSourceRoots = new JBList(new CollectionListModel<>(psiFacade.getTestSourcesRoots()));
         testSourceRoots.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         testSourceRoots.setCellRenderer(new DefaultPsiElementCellRenderer());
         ToolbarDecorator decorator = ToolbarDecorator.createDecorator(testSourceRoots);

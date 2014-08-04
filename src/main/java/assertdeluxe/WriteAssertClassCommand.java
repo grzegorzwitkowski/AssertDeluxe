@@ -1,42 +1,34 @@
 package assertdeluxe;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VfsUtil;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.codeStyle.CodeStyleManager;
-import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 public class WriteAssertClassCommand {
 
     private PsiAssertClassFactory assertClassFactory;
-    private Project project;
     private PsiClass sourceClass;
     private List<PsiField> chosenFields;
     private PsiDirectory testSourceRoot;
+    private PsiFacade psiFacade;
 
     public WriteAssertClassCommand(PsiClass sourceClass, List<PsiField> chosenFields,
-                                   PsiDirectory testSourceRoot, PsiAssertClassFactory assertClassFactory) {
-        this.project = sourceClass.getProject();
+                                   PsiDirectory testSourceRoot, PsiAssertClassFactory assertClassFactory, PsiFacade psiFacade) {
         this.sourceClass = sourceClass;
         this.chosenFields = chosenFields;
         this.testSourceRoot = testSourceRoot;
         this.assertClassFactory = assertClassFactory;
+        this.psiFacade = psiFacade;
     }
 
     public void invoke() throws IOException {
         PsiClass assertClass = assembleAssertClass();
-        JavaCodeStyleManager.getInstance(project).shortenClassReferences(assertClass);
-        CodeStyleManager.getInstance(project).reformat(assertClass);
-        addAssertClassToTargetDir(assertClass);
+        psiFacade.shortenClassReferences(assertClass);
+        psiFacade.reformat(assertClass);
+        psiFacade.addClassToTargetDir(sourceClass, testSourceRoot, assertClass);
     }
 
     private PsiClass assembleAssertClass() {
@@ -50,15 +42,4 @@ public class WriteAssertClassCommand {
         return assertClass;
     }
 
-    private void addAssertClassToTargetDir(PsiClass assertClass) throws IOException {
-        PsiDirectory targetDir = createTargetDir();
-        targetDir.add(assertClass);
-    }
-
-    private PsiDirectory createTargetDir() throws IOException {
-        String packageName = ((PsiJavaFile) sourceClass.getContainingFile()).getPackageName();
-        String packageRelativePath = packageName.replaceAll("\\.", File.separator);
-        VirtualFile directories = VfsUtil.createDirectories(testSourceRoot.getVirtualFile().getPath() + File.separator + packageRelativePath);
-        return PsiManager.getInstance(project).findDirectory(directories);
-    }
 }
