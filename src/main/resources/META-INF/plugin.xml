@@ -2,16 +2,16 @@
     <id>assert-deluxe</id>
     <name>Assert Deluxe</name>
     <version>1.0</version>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <vendor email="brylantwsp@gmail.com"> </vendor>
 
     <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      AssertDeluxe is a plugin for IntelliJ IDEA that simplifies creation of custom assertion class.
+      Let's say you have a simple POJO called Person. With AssertDeluxe you can press ALT+Insert to generate Custom Assertion Class
+      to have nice and easy to read assertions in your tests.
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+
     ]]>
     </change-notes>
 
