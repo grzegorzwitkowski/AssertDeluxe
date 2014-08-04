@@ -83,7 +83,7 @@ public class AssertDeluxeAction extends AnAction {
         return null;
     }
 
-    private void generateAssertionClass(PsiClass sourceClass, List<PsiField> chosenFields, PsiDirectory testSourceRoot) {
+    private void generateAssertionClass(final PsiClass sourceClass, final List<PsiField> chosenFields, final PsiDirectory testSourcesRoot) {
         new WriteCommandAction.Simple(sourceClass.getProject()) {
 
             @Override
@@ -91,7 +91,7 @@ public class AssertDeluxeAction extends AnAction {
                 AssertClassCodeGenerator assertClassCodeGenerator = new AssertClassCodeGenerator(sourceClass);
                 PsiElementFactory psiElementFactory = JavaPsiFacade.getElementFactory(getProject());
                 PsiAssertClassFactory psiAssertClassFactory = new PsiAssertClassFactory(assertClassCodeGenerator, psiElementFactory);
-                new WriteAssertClassCommand(sourceClass, chosenFields, testSourceRoot, psiAssertClassFactory).invoke();
+                new WriteAssertClassCommand(sourceClass, chosenFields, testSourcesRoot, psiAssertClassFactory).invoke();
             }
         }.execute();
     }
