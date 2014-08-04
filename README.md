@@ -27,9 +27,9 @@ public class Person {
         return age;
     }
 }
-```java
-With AssertDeluxe you can press ALT+Insert to generate Custom Assertion Class.
 ```
+With AssertDeluxe you can press ALT+Insert to generate Custom Assertion Class.
+```java
 import org.assertj.core.api.Assertions;
 
 public class PersonAssert {
