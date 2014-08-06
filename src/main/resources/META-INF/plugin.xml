@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>assert-deluxe</id>
     <name>Assert Deluxe</name>
-    <version>1.0</version>
+    <version>1.1</version>
     <vendor email="brylantwsp@gmail.com"></vendor>
 
     <description><![CDATA[
