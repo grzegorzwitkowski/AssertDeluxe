@@ -2,17 +2,32 @@
     <id>assert-deluxe</id>
     <name>Assert Deluxe</name>
     <version>1.0</version>
-    <vendor email="brylantwsp@gmail.com"> </vendor>
+    <vendor email="brylantwsp@gmail.com"></vendor>
 
     <description><![CDATA[
-      AssertDeluxe is a plugin for IntelliJ IDEA that simplifies creation of custom assertion class.
-      Let's say you have a simple POJO called Person. With AssertDeluxe you can press ALT+Insert to generate Custom Assertion Class
-      to have nice and easy to read assertions in your tests.
+<p>
+AssertDeluxe is a plugin for IntelliJ IDEA that simplifies creation of custom assertion classes in Java.
+Let's say you have a simple POJO called Person. With AssertDeluxe you can press ALT+Insert to generate
+Custom Assertion Class to have nice and easy to read assertions in your tests.
+</p>
+
+<p>So instead to write assertions like:</p>
+
+<pre><code>
+assertThat(person.getFirstName()).isEqualTo("John");
+assertThat(person.getLastName()).isEqualTo("Doe");
+assertThat(person.getAge()).isEqualTo(42);
+</code></pre>
+
+<p>you can write:</p>
+<pre><code>
+assertPerson(person).hasFirstName("John").hasLastName("Doe").hasAge(42);
+</code></pre>
     ]]></description>
 
     <change-notes><![CDATA[
 
-    ]]>
+            ]]>
     </change-notes>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
