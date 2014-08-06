@@ -1,11 +1,10 @@
 package assertdeluxe;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
@@ -21,24 +20,28 @@ import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.jetbrains.jps.model.java.JavaModuleSourceRootTypes.TESTS;
+import static com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR;
+import static com.intellij.openapi.actionSystem.CommonDataKeys.PSI_FILE;
+import static java.io.File.separator;
+import static org.jetbrains.jps.model.java.JavaSourceRootType.TEST_SOURCE;
 
 public class PsiFacade {
 
     private Project project;
+    private Module module;
 
-    public PsiFacade(Project project) {
+    public PsiFacade(Project project, Module module) {
         this.project = project;
+        this.module = module;
     }
 
     public PsiClass getPsiClassFromEvent(AnActionEvent e) {
-        PsiFile file = e.getData(LangDataKeys.PSI_FILE);
-        Editor editor = e.getData(PlatformDataKeys.EDITOR);
+        PsiFile file = e.getData(PSI_FILE);
+        Editor editor = e.getData(EDITOR);
         if (file == null || editor == null) {
             return null;
         }
@@ -60,20 +63,20 @@ public class PsiFacade {
     }
 
     public PsiDirectory getTestSourcesRoot() {
-        VirtualFile root = testSourceRoots().get(0);
+        VirtualFile root = testSourcesRoots().get(0);
         return PsiManager.getInstance(project).findDirectory(root);
     }
 
     public List<PsiDirectory> getTestSourcesRoots() {
         List<PsiDirectory> testSourcesRoots = new LinkedList<>();
-        for (VirtualFile vf : testSourceRoots()) {
+        for (VirtualFile vf : testSourcesRoots()) {
             testSourcesRoots.add(PsiManager.getInstance(project).findDirectory(vf));
         }
         return testSourcesRoots;
     }
 
-    private List<VirtualFile> testSourceRoots() {
-        return ProjectRootManager.getInstance(project).getModuleSourceRoots(TESTS);
+    private List<VirtualFile> testSourcesRoots() {
+        return ModuleRootManager.getInstance(module).getSourceRoots(TEST_SOURCE);
     }
 
     public PsiElement shortenClassReferences(PsiClass psiClass) {
@@ -84,15 +87,15 @@ public class PsiFacade {
         return CodeStyleManager.getInstance(project).reformat(psiClass);
     }
 
-    public void addClassToTargetDir(PsiClass sourceClass, PsiDirectory testSourceRoot, PsiClass psiClass) throws IOException {
-        PsiDirectory targetDir = createTargetDir(sourceClass, testSourceRoot);
+    public void addClassToTargetDir(PsiClass sourceClass, PsiDirectory testSourcesRoot, PsiClass psiClass) throws IOException {
+        PsiDirectory targetDir = createTargetDir(sourceClass, testSourcesRoot);
         targetDir.add(psiClass);
     }
 
-    private PsiDirectory createTargetDir(PsiClass sourceClass, PsiDirectory testSourceRoot) throws IOException {
+    private PsiDirectory createTargetDir(PsiClass sourceClass, PsiDirectory testSourcesRoot) throws IOException {
         String packageName = ((PsiJavaFile) sourceClass.getContainingFile()).getPackageName();
-        String packageRelativePath = packageName.replaceAll("\\.", File.separator);
-        VirtualFile directories = VfsUtil.createDirectories(testSourceRoot.getVirtualFile().getPath() + File.separator + packageRelativePath);
+        String packageRelativePath = packageName.replaceAll("\\.", separator);
+        VirtualFile directories = VfsUtil.createDirectories(testSourcesRoot.getVirtualFile().getPath() + separator + packageRelativePath);
         return PsiManager.getInstance(project).findDirectory(directories);
     }
 }

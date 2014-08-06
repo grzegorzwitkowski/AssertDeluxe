@@ -12,13 +12,13 @@ public class WriteAssertClassCommand {
     private PsiAssertClassFactory assertClassFactory;
     private PsiClass sourceClass;
     private List<PsiField> chosenFields;
-    private PsiDirectory testSourceRoot;
+    private PsiDirectory testSourcesRoot;
     private PsiFacade psiFacade;
 
-    public WriteAssertClassCommand(PsiClass sourceClass, List<PsiField> chosenFields, PsiDirectory testSourceRoot, PsiFacade psiFacade) {
+    public WriteAssertClassCommand(PsiClass sourceClass, List<PsiField> chosenFields, PsiDirectory testSourcesRoot, PsiFacade psiFacade) {
         this.sourceClass = sourceClass;
         this.chosenFields = chosenFields;
-        this.testSourceRoot = testSourceRoot;
+        this.testSourcesRoot = testSourcesRoot;
         this.assertClassFactory = new PsiAssertClassFactory(new AssertClassCodeGenerator(sourceClass), psiFacade);
         this.psiFacade = psiFacade;
     }
@@ -27,7 +27,7 @@ public class WriteAssertClassCommand {
         PsiClass assertClass = assembleAssertClass();
         psiFacade.shortenClassReferences(assertClass);
         psiFacade.reformat(assertClass);
-        psiFacade.addClassToTargetDir(sourceClass, testSourceRoot, assertClass);
+        psiFacade.addClassToTargetDir(sourceClass, testSourcesRoot, assertClass);
     }
 
     private PsiClass assembleAssertClass() {
