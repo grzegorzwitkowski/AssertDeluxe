@@ -59,3 +59,13 @@ public class PersonAssert {
     }
 }
 ```
+So instead to write assertions like:
+```java
+assertThat(person.getFirstName()).isEqualTo("John");
+assertThat(person.getLastName()).isEqualTo("Doe");
+assertThat(person.getAge()).isEqualTo(42);
+```
+you can write:
+```java
+assertPerson(person).hasFirstName("John").hasLastName("Doe").hasAge(42);
+```
