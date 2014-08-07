@@ -19,21 +19,25 @@ public class AssertDeluxeAction extends AnAction {
 
     public void actionPerformed(AnActionEvent e) {
         PsiFacade psiFacade = new PsiFacade(e.getProject(), findModule(e));
+        if (psiFacade.getTestSourcesRoots().size() == 0) {
+            Messages.showErrorDialog("No Test Sources Root found.", "Custom Assertion Class");
+            return;
+        }
         PsiClass sourceClass = psiFacade.getPsiClassFromEvent(e);
-        int numberOfTestSourcesRoots = psiFacade.getTestSourcesRoots().size();
-        if (numberOfTestSourcesRoots == 0) {
-            Messages.showErrorDialog("No Test Sources Root found.", "Custom Assertion");
-            return;
+        SelectionDialog selectionDialog = new SelectionDialog(sourceClass, psiFacade);
+        selectionDialog.show();
+        if (selectionDialog.isOK()) {
+            List<PsiField> selectedFields = selectionDialog.getFields();
+            PsiDirectory selectedTestSourcesRoot = selectionDialog.getTestSourcesRoot();
+            if (selectedFields.isEmpty()) {
+                Messages.showErrorDialog("No field was selected.", "Custom Assertion Class");
+                return;
+            } else if (selectedTestSourcesRoot == null) {
+                Messages.showErrorDialog("No test sources root was selected.", "Custom Assertion Class");
+                return;
+            }
+            generateAssertionClass(sourceClass, selectedFields, selectedTestSourcesRoot, psiFacade);
         }
-        List<PsiField> selectedFields = getFieldsSelectedByUser(sourceClass);
-        if (selectedFields == null) {
-            return;
-        }
-        PsiDirectory testSourcesRoot = choseTestSourcesRoot(sourceClass, numberOfTestSourcesRoots, psiFacade);
-        if (testSourcesRoot == null) {
-            return;
-        }
-        generateAssertionClass(sourceClass, selectedFields, testSourcesRoot, psiFacade);
     }
 
     @Override
@@ -46,34 +50,6 @@ public class AssertDeluxeAction extends AnAction {
     private Module findModule(AnActionEvent e) {
         PsiFile file = e.getData(PSI_FILE);
         return ModuleUtil.findModuleForPsiElement(file);
-    }
-
-    private List<PsiField> getFieldsSelectedByUser(PsiClass sourceClass) {
-        SelectFieldsDialog selectFieldsDialog = new SelectFieldsDialog(sourceClass);
-        selectFieldsDialog.show();
-        if (selectFieldsDialog.isOK()) {
-            return selectFieldsDialog.getFields();
-        }
-        return null;
-    }
-
-    private PsiDirectory choseTestSourcesRoot(PsiClass sourceClass, int numberOfTestSourcesRoots, PsiFacade psiFacade) {
-        PsiDirectory testSourcesRoot = null;
-        if (numberOfTestSourcesRoots == 1) {
-            testSourcesRoot = psiFacade.getTestSourcesRoot();
-        } else if (numberOfTestSourcesRoots > 1) {
-            testSourcesRoot = getTestSourcesRootSelectedByUser(sourceClass, psiFacade);
-        }
-        return testSourcesRoot;
-    }
-
-    private PsiDirectory getTestSourcesRootSelectedByUser(PsiClass sourceClass, PsiFacade psiFacade) {
-        SelectTestSourcesRootDialog selectTestSourcesRootDialog = new SelectTestSourcesRootDialog(sourceClass.getProject(), psiFacade);
-        selectTestSourcesRootDialog.show();
-        if (selectTestSourcesRootDialog.isOK()) {
-            return selectTestSourcesRootDialog.getTestSourcesRoot();
-        }
-        return null;
     }
 
     private void generateAssertionClass(final PsiClass sourceClass, final List<PsiField> chosenFields, final PsiDirectory testSourcesRoot,
