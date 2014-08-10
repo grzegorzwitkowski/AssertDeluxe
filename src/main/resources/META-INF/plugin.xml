@@ -4,7 +4,8 @@
     <version>1.3</version>
     <vendor email="gmwitkowski@gmail.com"></vendor>
 
-    <description><![CDATA[
+    <description>
+<![CDATA[
 <p>
 AssertDeluxe is a plugin for IntelliJ IDEA that simplifies creation of custom assertion classes in Java.
 Let's say you have a simple POJO called Person. With AssertDeluxe you can press ALT+Insert to generate
@@ -23,7 +24,11 @@ assertThat(person.getAge()).isEqualTo(42);
 <pre><code>
 assertPerson(person).hasFirstName("John").hasLastName("Doe").hasAge(42);
 </code></pre>
+]]>
+    </description>
 
+    <change-notes>
+<![CDATA[
 <p>Changelog</p>
 <p>
 1.3
@@ -37,11 +42,7 @@ assertPerson(person).hasFirstName("John").hasLastName("Doe").hasAge(42);
 <li>compiled with jdk 1.7 (1.1 worked only with jdk 1.8)</li>
 </ul>
 </p>
-    ]]></description>
-
-    <change-notes><![CDATA[
-
-            ]]>
+]]>
     </change-notes>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
