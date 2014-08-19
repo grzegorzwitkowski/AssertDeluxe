@@ -29,7 +29,6 @@ assertPerson(person).hasFirstName("John").hasLastName("Doe").hasAge(42);
 
     <change-notes>
 <![CDATA[
-<p>Changelog</p>
 <p>
 1.3
 <ul>
